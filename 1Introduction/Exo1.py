@@ -1,4 +1,10 @@
+from socket import timeout
 import requests
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+import re
+
+
 
 
 class req:
@@ -16,18 +22,30 @@ class req:
             return response
         return self.get(retry = retry - 1)
 
-def remove_spaces(string_input):
-    if string_input == "":
-        return string_input
-    string_fixed = string_input[0]
-    for i in range(1,len(string_input)):
-        if string_input[i-1] != " " or string_input[i] != " ":
-            string_fixed += string_input[i]
-    return string_fixed 
+    def get_clean_response(self, timeout = 3, retry = 1):
+        response = self.get(timeout=timeout,retry=retry)
+        html_text = response.text
+        html_text_without_spaces = self.remove_spaces(html_text)
+        return html_text_without_spaces
 
+    def remove_spaces(self, string_input):
+        if string_input == "":
+            return string_input
+        string_fixed = string_input[0]
+        for i in range(1,len(string_input)):
+            if not (string_input[i-1] in (" ","\t","\n")) or not (string_input[i] in (" ","\t","\n")):
+                string_fixed += string_input[i]
+        return string_fixed 
 
+    def get_domain(self):
+        parsed_url = urlparse(self.url)
+        domain_name = parsed_url.netloc
+        return domain_name
 
 
 
 r = req()
-response = r.get(timeout = 3, retry = 4)
+clean_response = r.get_clean_response(timeout = 3, retry = 4)
+domain_name = r.get_domain()
+print(clean_response)
+print(domain_name)
