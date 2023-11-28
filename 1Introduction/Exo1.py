@@ -9,7 +9,6 @@ class req:
         pass
 
     def get(self, timeout = 3, retry = 1):
-        print(retry)
         if retry == 0:
             return None
         response = requests.get(self.url, headers = {'User-Agent' : self.userAgent}, timeout=timeout)
@@ -17,6 +16,18 @@ class req:
             return response
         return self.get(retry = retry - 1)
 
+def remove_spaces(string_input):
+    if string_input == "":
+        return string_input
+    string_fixed = string_input[0]
+    for i in range(1,len(string_input)):
+        if string_input[i-1] != " " or string_input[i] != " ":
+            string_fixed += string_input[i]
+    return string_fixed 
+
+
+
+
+
 r = req()
 response = r.get(timeout = 3, retry = 4)
-print(response.status_code)
