@@ -84,25 +84,31 @@ class req:
         return external_links
 
     
+def req_to_dict(request):
+    request_dict = {"Url":request.url, "User-Agent":request.userAgent, "Domain-Name":request.domain, "Title":request.title, "H1":request.H1, "Image-Links":request.image_links, "External-Links":request.external_links, "Text":request.text}
+    return request_dict
 
 
 
 r = req("http://www.esiee.fr/",3,1)
-clean_response = r.get_clean_response(timeout = 3, retry = 4)
+# clean_response = r.get_clean_response(timeout = 3, retry = 4)
 
-userAgent = r.userAgent
-title = r.title
-domain_name = r.domain
-H1 = r.H1
-image_links = r.image_links
-external_links = r.external_links
-text = r.text
-#print(clean_response)
+# userAgent = r.userAgent
+# title = r.title
+# domain_name = r.domain
+# H1 = r.H1
+# image_links = r.image_links
+# external_links = r.external_links
+# text = r.text
+# print(clean_response)
 
-print(userAgent)
-print(title)
-print(domain_name)
-print(H1)
-print(image_links)
-print(external_links)
+# print(userAgent)
+# print(title)
+# print(domain_name)
+# print(H1)
+# print(image_links)
+# print(external_links)
+
+req_dict = req_to_dict(r)
+print(req_dict)
 
