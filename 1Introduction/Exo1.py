@@ -12,9 +12,7 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.146",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Gecko/20100101 Firefox/97.0",
     "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
-    "curl/7.68.0"
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Mobile/15E148 Safari/604.1"
 ]
 
 class req:
@@ -23,7 +21,10 @@ class req:
         self.userAgent = user_agents[random.randint(0,len(user_agents)-1)]
         self.domain = self.get_domain()
         self.soup = self.get_soup(timeout = timeout, retry = retry)
-        self.title = self.soup.head.title
+        if self.soup.head != None:
+            self.title = self.soup.head.title
+        else:
+            self.title = None
         self.H1 = self.soup.find_all("h1")
         self.image_links = self.get_image_links()
         self.external_links = self.get_external_links()
@@ -41,7 +42,7 @@ class req:
     def get_clean_response(self, timeout = 3, retry = 1):
         response = self.get(timeout=timeout,retry=retry)
         html_text = response.text
-        html_text_without_spaces = self.remove_spaces(html_text)
+        html_text_without_spaces = remove_spaces(html_text)
         return html_text_without_spaces
     
     def get_soup(self, timeout = 3, retry = 1):
@@ -49,16 +50,6 @@ class req:
         soup = BeautifulSoup(response.text,features="lxml")
         return soup
     
-    def remove_spaces(self, string_input):
-        spaces = [" ","\t","\n"]
-        if string_input == "":
-            return string_input
-        string_fixed = string_input[0]
-        for i in range(1,len(string_input)):
-            if not (string_input[i-1] in spaces) or not (string_input[i] in spaces):
-                string_fixed += string_input[i]
-        return string_fixed 
-
     def get_domain(self):
         parsed_url = urlparse(self.url)
         domain_name = parsed_url.netloc
@@ -83,32 +74,41 @@ class req:
     
         return external_links
 
-    
+def remove_spaces(string_input):
+    spaces = [" ","\t","\n"]
+    if string_input == "":
+        return string_input
+    string_fixed = string_input[0]
+    for i in range(1,len(string_input)):
+        if not (string_input[i-1] in spaces) or not (string_input[i] in spaces):
+            string_fixed += string_input[i]
+    return string_fixed 
+
+
 def req_to_dict(request):
     request_dict = {"Url":request.url, "User-Agent":request.userAgent, "Domain-Name":request.domain, "Title":request.title, "H1":request.H1, "Image-Links":request.image_links, "External-Links":request.external_links, "Text":request.text}
     return request_dict
 
 
 
-r = req("http://www.esiee.fr/",3,1)
-# clean_response = r.get_clean_response(timeout = 3, retry = 4)
+r_esiee = req("http://www.esiee.fr/",3,1)
 
-# userAgent = r.userAgent
-# title = r.title
-# domain_name = r.domain
-# H1 = r.H1
-# image_links = r.image_links
-# external_links = r.external_links
-# text = r.text
-# print(clean_response)
 
-# print(userAgent)
-# print(title)
-# print(domain_name)
-# print(H1)
-# print(image_links)
-# print(external_links)
+esiee_dict = req_to_dict(r_esiee)
+#print(esiee_dict)
 
-req_dict = req_to_dict(r)
-print(req_dict)
+
+#Exo4
+
+def get_research_results(research_words):
+    request = "https://www.qwant.com/?q=" + remove_spaces(research_words).replace(" ","+") + "&t=web"
+    r_qwant_search = req(request,3,1)
+    search_dict = req_to_dict(r_qwant_search)
+    results = [result for result in search_dict["External-Links"] if not ("qwant" in result)]
+    return list(set(results))
+    
+
+results = get_research_results("chien de chasse")
+for result in results:
+    print(result)
 
