@@ -1,5 +1,5 @@
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import random
 
@@ -24,7 +24,10 @@ class req:
         self.domain = self.get_domain()
         self.soup = self.get_soup(timeout = timeout, retry = retry)
         self.title = self.soup.head.title
-        self.H1 = self.soup.find_all(class_ = "h1")
+        self.H1 = self.soup.find_all("h1")
+        self.image_links = self.get_image_links()
+        self.external_links = self.get_external_links()
+        self.text = self.soup.text
         pass
 
     def get(self, timeout = 3, retry = 1):
@@ -61,6 +64,25 @@ class req:
         domain_name = parsed_url.netloc
         return domain_name
 
+    def get_image_links(self):
+        images = self.soup.find_all("img")
+        image_links = [img['src'] for img in images]
+        return image_links
+
+    def get_external_links(self):
+    
+        # Find all anchor (a) elements
+        anchor_elements = self.soup.find_all('a')
+    
+        # Extract href attributes and filter external links
+        external_links = [
+            urljoin(self.url, anchor.get('href')) 
+            for anchor in anchor_elements 
+            if anchor.get('href') and urlparse(anchor.get('href')).netloc != urlparse(self.url).netloc
+        ]
+    
+        return external_links
+
     
 
 
@@ -71,8 +93,16 @@ clean_response = r.get_clean_response(timeout = 3, retry = 4)
 userAgent = r.userAgent
 title = r.title
 domain_name = r.domain
+H1 = r.H1
+image_links = r.image_links
+external_links = r.external_links
+text = r.text
 #print(clean_response)
 
 print(userAgent)
 print(title)
 print(domain_name)
+print(H1)
+print(image_links)
+print(external_links)
+
