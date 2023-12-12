@@ -106,9 +106,15 @@ def get_research_results(research_words):
     search_dict = req_to_dict(r_qwant_search)
     results = [result for result in search_dict["External-Links"] if not ("qwant" in result)]
     return list(set(results))
-    
 
-results = get_research_results("chien de chasse")
+
+str_research = input("Search: ")
+results = get_research_results(str_research)
 for result in results:
     print(result)
 
+
+def get_lemonde_rss(category):
+    request = "https://www.lemonde.fr/" + category.lower() + "/rss_full.xml"
+    r_lemonde = req(request,3,1)
+    
